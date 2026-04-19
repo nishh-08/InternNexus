@@ -49,3 +49,53 @@ export const getAllInternships = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// GET /api/internships/search?title=&location=&stipend=
+export const searchInternships = async (req, res) => {
+  try {
+    const { title, location, stipend } = req.query;
+
+    let query = `
+      SELECT 
+        internships.id,
+        internships.title,
+        internships.description,
+        internships.location,
+        internships.stipend,
+        internships.posted_at,
+        users.name AS company_name
+      FROM internships
+      JOIN users ON internships.company_id = users.id
+      WHERE 1=1
+    `;
+
+    const values = [];
+    let count = 1;
+
+    if (title) {
+      query += ` AND internships.title ILIKE $${count}`;
+      values.push(`%${title}%`);
+      count++;
+    }
+
+    if (location) {
+      query += ` AND internships.location ILIKE $${count}`;
+      values.push(`%${location}%`);
+      count++;
+    }
+
+    if (stipend) {
+      query += ` AND internships.stipend >= $${count}`;
+      values.push(parseInt(stipend));
+      count++;
+    }
+
+    query += ` ORDER BY posted_at DESC`;
+
+    const result = await pool.query(query, values);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};

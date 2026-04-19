@@ -4,10 +4,17 @@ import { checkRole } from "../middleware/roleMiddleware.js";
 import {
   applyToInternship,
   getStudentApplications,
-  getCompanyApplications
+  getCompanyApplications,
+  updateApplicationStatus
 } from "../controllers/applicationController.js";
 
+
 const router = express.Router();
+console.log("Application routes loaded"); 
+// TEMP TEST ROUTE - no middleware
+router.patch("/test/:id", (req, res) => {
+  res.json({ message: "patch works", id: req.params.id });
+});
 
 // Student applies to internship
 router.post("/apply", verifyToken, checkRole(["student"]), applyToInternship);
@@ -18,4 +25,6 @@ router.get("/student", verifyToken, checkRole(["student"]), getStudentApplicatio
 // Company views applicants
 router.get("/company", verifyToken, checkRole(["company"]), getCompanyApplications);
 
+// Company accepts or rejects application
+router.patch("/:id/status", verifyToken, checkRole(["company"]), updateApplicationStatus);
 export default router;

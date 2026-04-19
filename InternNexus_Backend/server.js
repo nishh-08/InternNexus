@@ -26,3 +26,6 @@ app.get("/", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+app.patch("/test", (req, res) => {
+  res.json({ message: "patch works on server level" });
+});

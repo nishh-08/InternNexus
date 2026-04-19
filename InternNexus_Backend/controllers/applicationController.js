@@ -88,3 +88,39 @@ export const getCompanyApplications = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// PATCH /api/applications/:id/status
+// Company accepts or rejects an application
+export const updateApplicationStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const company_id = req.user.id;
+
+    // Validate status value
+    if (!["accepted", "rejected", "pending"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    // Make sure this application belongs to the company's internship
+    const result = await pool.query(
+      `UPDATE applications
+       SET status = $1
+       WHERE id = $2
+       AND internship_id IN (
+         SELECT id FROM internships WHERE company_id = $3
+       )
+       RETURNING *`,
+      [status, id, company_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Application not found or unauthorized" });
+    }
+
+    res.json({ message: `Application ${status}`, application: result.rows[0] });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
