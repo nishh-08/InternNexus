@@ -13,8 +13,19 @@ const PORT = process.env.PORT || 5000;
 
 //add vercel url to cors
 // telling backend to allow requests from the frontend. as they are running diff ports
+// add wildcard CORS for all Vercel URLs
 app.use(cors({
-  origin: ["http://localhost:5173", "https://intern-nexus-six.vercel.app"],
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:5173",
+      "https://intern-nexus-six.vercel.app"
+    ];
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
