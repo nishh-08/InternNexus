@@ -39,6 +39,7 @@ export const getStudentApplications = async (req, res) => {
     const result = await pool.query(
       `SELECT 
         applications.id,
+        applications.internship_id, 
         applications.status,
         applications.applied_at,
         internships.title,

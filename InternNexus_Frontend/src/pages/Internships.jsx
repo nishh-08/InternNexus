@@ -6,11 +6,15 @@ export default function Internships() {
   const navigate = useNavigate();
   const [internships, setInternships] = useState([]);
   const [search, setSearch] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [stipendFilter, setStipendFilter] = useState("");
   const [message, setMessage] = useState("");
+  const [appliedIds, setAppliedIds] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     fetchInternships();
+    if (user?.role === "student") fetchApplied();
   }, []);
 
   const fetchInternships = async () => {
@@ -22,10 +26,21 @@ export default function Internships() {
     }
   };
 
-  const handleSearch = async (e) => {
-    setSearch(e.target.value);
+  const fetchApplied = async () => {
     try {
-      const res = await API.get(`/internships/search?title=${e.target.value}`);
+      const res = await API.get("/applications/student");
+      const ids = res.data.map((app) => app.internship_id);
+      setAppliedIds(ids);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSearch = async (title = search, location = locationFilter, stipend = stipendFilter) => {
+    try {
+      const res = await API.get(
+        `/internships/search?title=${title}&location=${location}&stipend=${stipend}`
+      );
       setInternships(res.data);
     } catch (err) {
       console.error(err);
@@ -35,6 +50,7 @@ export default function Internships() {
   const handleApply = async (internship_id) => {
     try {
       await API.post("/applications/apply", { internship_id });
+      setAppliedIds([...appliedIds, internship_id]);
       setMessage("Applied successfully!");
       setTimeout(() => setMessage(""), 3000);
     } catch (err) {
@@ -82,21 +98,51 @@ export default function Internships() {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto py-8 px-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Available Internships
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Available Internships</h2>
 
         {/* Search Bar */}
         <input
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="Search internships by title..."
           value={search}
-          onChange={handleSearch}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            handleSearch(e.target.value, locationFilter, stipendFilter);
+          }}
         />
+
+        {/* Filters Row */}
+        <div className="flex gap-3 mb-6">
+          <input
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Filter by location..."
+            value={locationFilter}
+            onChange={(e) => {
+              setLocationFilter(e.target.value);
+              handleSearch(search, e.target.value, stipendFilter);
+            }}
+          />
+          <select
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={stipendFilter}
+            onChange={(e) => {
+              setStipendFilter(e.target.value);
+              handleSearch(search, locationFilter, e.target.value);
+            }}
+          >
+            <option value="">Any Stipend</option>
+            <option value="1000">₹1000+</option>
+            <option value="3000">₹3000+</option>
+            <option value="5000">₹5000+</option>
+            <option value="10000">₹10000+</option>
+          </select>
+        </div>
 
         {/* Success/Error Message */}
         {message && (
-          <div className={`p-3 rounded-lg mb-4 text-center font-semibold ${message.includes("success") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+          <div className={`p-3 rounded-lg mb-4 text-center font-semibold ${
+            message.includes("success") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+          }`}>
             {message}
           </div>
         )}
@@ -124,10 +170,14 @@ export default function Internships() {
                   </div>
                   {user?.role === "student" && (
                     <button
-                      onClick={() => handleApply(intern.id)}
-                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-semibold"
+                      onClick={() => !appliedIds.includes(intern.id) && handleApply(intern.id)}
+                      className={`px-4 py-2 rounded-lg font-semibold transition ${
+                        appliedIds.includes(intern.id)
+                          ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                          : "bg-indigo-600 text-white hover:bg-indigo-700"
+                      }`}
                     >
-                      Apply
+                      {appliedIds.includes(intern.id) ? "Applied ✓" : "Apply"}
                     </button>
                   )}
                 </div>
