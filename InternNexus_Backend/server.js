@@ -11,6 +11,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+//add vercel url to cors
+app.use(cors({
+  origin: ["http://localhost:5173", "https://intern-nexus-six.vercel.app"],
+  credentials: true
+}));
+
 // telling backend to allow requests from the frontend. as they are running diff ports
 app.use(cors({
   origin: "http://localhost:5173",
@@ -37,3 +43,4 @@ app.listen(PORT, () => {
 app.patch("/test", (req, res) => {
   res.json({ message: "patch works on server level" });
 });
+
