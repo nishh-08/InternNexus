@@ -59,6 +59,15 @@ export default function Internships() {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      await API.delete(`/internships/${id}`);
+      setInternships(internships.filter((intern) => intern.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
@@ -178,6 +187,14 @@ export default function Internships() {
                       }`}
                     >
                       {appliedIds.includes(intern.id) ? "Applied ✓" : "Apply"}
+                    </button>
+                  )}
+                  {user?.role === "company" && (
+                    <button
+                      onClick={() => handleDelete(intern.id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition font-semibold"
+                    >
+                      Delete
                     </button>
                   )}
                 </div>

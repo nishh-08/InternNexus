@@ -99,3 +99,27 @@ export const searchInternships = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// DELETE /api/internships/:id
+export const deleteInternship = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const company_id = req.user.id;
+
+    const result = await pool.query(
+      `DELETE FROM internships 
+       WHERE id = $1 AND company_id = $2
+       RETURNING *`,
+      [id, company_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Internship not found or unauthorized" });
+    }
+
+    res.json({ message: "Internship deleted successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};

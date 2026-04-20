@@ -5,7 +5,8 @@ import {
   applyToInternship,
   getStudentApplications,
   getCompanyApplications,
-  updateApplicationStatus
+  updateApplicationStatus,
+   deleteApplication
 } from "../controllers/applicationController.js";
 
 
@@ -27,4 +28,9 @@ router.get("/company", verifyToken, checkRole(["company"]), getCompanyApplicatio
 
 // Company accepts or rejects application
 router.patch("/:id/status", verifyToken, checkRole(["company"]), updateApplicationStatus);
+
+// student withdraws application
+router.delete("/:id", verifyToken, checkRole(["student"]), deleteApplication);
+
 export default router;
+

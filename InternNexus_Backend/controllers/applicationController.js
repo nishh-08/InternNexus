@@ -125,3 +125,27 @@ export const updateApplicationStatus = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// DELETE /api/applications/:id
+export const deleteApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const student_id = req.user.id;
+
+    const result = await pool.query(
+      `DELETE FROM applications 
+       WHERE id = $1 AND student_id = $2
+       RETURNING *`,
+      [id, student_id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Application not found or unauthorized" });
+    }
+
+    res.json({ message: "Application withdrawn successfully" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
