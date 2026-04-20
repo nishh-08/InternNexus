@@ -12,17 +12,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 //add vercel url to cors
+// telling backend to allow requests from the frontend. as they are running diff ports
 app.use(cors({
   origin: ["http://localhost:5173", "https://intern-nexus-six.vercel.app"],
   credentials: true
 }));
-
-// telling backend to allow requests from the frontend. as they are running diff ports
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
-
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/internships", internshipRoutes);
