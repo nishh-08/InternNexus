@@ -20,10 +20,8 @@ export const createInternship = async (req, res) => {
   }
 };
 
-// Get all internships WITH company name
 export const getAllInternships = async (req, res) => {
   try {
-
     const result = await pool.query(`
       SELECT 
         internships.id,
@@ -33,17 +31,35 @@ export const getAllInternships = async (req, res) => {
         internships.stipend,
         internships.posted_at,
         users.name AS company_name
-
       FROM internships
-
-      JOIN users 
-      ON internships.company_id = users.id
-
+      JOIN users ON internships.company_id = users.id
       ORDER BY posted_at DESC
     `);
-
     res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
+//gets only company's own internships
+export const getMyInternships = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        internships.id,
+        internships.title,
+        internships.description,
+        internships.location,
+        internships.stipend,
+        internships.posted_at,
+        users.name AS company_name
+      FROM internships
+      JOIN users ON internships.company_id = users.id
+      WHERE internships.company_id = $1
+      ORDER BY posted_at DESC
+    `, [req.user.id]);
+    res.json(result.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: "Server error" });
@@ -84,12 +100,17 @@ export const searchInternships = async (req, res) => {
       count++;
     }
 
-    if (stipend) {
-      query += ` AND internships.stipend >= $${count}`;
-      values.push(parseInt(stipend));
-      count++;
+    if (stipend !== undefined && stipend !== "") {
+       if (stipend === "unpaid") {
+    // show only unpaid internships
+           query += ` AND internships.stipend = 0`;
+       } else {
+     // show internships with stipend >= selected value
+           query += ` AND internships.stipend >= $${count}`;
+           values.push(parseInt(stipend));
+           count++;
+       }
     }
-
     query += ` ORDER BY posted_at DESC`;
 
     const result = await pool.query(query, values);

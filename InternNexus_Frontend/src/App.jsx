@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Internships from "./pages/Internships";
 import MyApplications from "./pages/MyApplications";
 import CompanyDashboard from "./pages/CompanyDashboard";
+import PostInternship from "./pages/PostInternship";
 
 
 export default function App() {
@@ -18,6 +19,8 @@ export default function App() {
         <Route path="/internships" element={<Internships />} />
         <Route path="/my-applications" element={<MyApplications />} />
         <Route path="/company-dashboard" element={<CompanyDashboard />} />
+        <Route path="/post-internship" element={<PostInternship />} />
+
       </Routes>
     </BrowserRouter>
   );

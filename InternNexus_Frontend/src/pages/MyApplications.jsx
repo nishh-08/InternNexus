@@ -87,7 +87,10 @@ export default function MyApplications() {
                         <p className="text-indigo-600 text-sm font-medium">{app.company_name}</p>
                         <div className="flex gap-3 mt-2">
                           <span className="text-xs text-gray-500">📍 {app.location}</span>
-                          <span className="text-xs text-gray-500">₹{parseInt(app.stipend).toLocaleString()}/month</span>
+                          <span className="text-xs text-gray-500">
+                              {parseInt(app.stipend) === 0 ? "Unpaid" : `₹${parseInt(app.stipend).toLocaleString()}/month`}
+                          </span>
+                          
                         </div>
                         <p className="text-xs text-gray-400 mt-1">Applied {new Date(app.applied_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                       </div>
