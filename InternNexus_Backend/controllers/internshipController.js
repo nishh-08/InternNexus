@@ -138,7 +138,7 @@ export const deleteInternship = async (req, res) => {
       return res.status(404).json({ message: "Internship not found or unauthorized" });
     }
 
-    res.json({ message: "Internship deleted successfully" });
+    res.json({ message: "Internship deleted successfully." });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: "Server error" });
